@@ -359,7 +359,6 @@ void watchdogTask(void * parameter) {
 // =====================================================
 //                         SETUP
 // =====================================================
-
 void setup() {
 
   Serial.begin(115200);
@@ -376,7 +375,7 @@ void setup() {
 
   sharedPtr->lastSensorUpdateMs = millis();
 
-  // ================= DHT =================
+  // ================= DHT SENSOR =================
 
   dht.setup(DHT_PIN, DHTesp::DHT22);
 
@@ -412,7 +411,13 @@ void setup() {
 
   // ================= WATCHDOG =================
 
-  esp_task_wdt_init(WDT_TIMEOUT_SEC, true);
+  esp_task_wdt_config_t wdt_config = {
+    .timeout_ms = WDT_TIMEOUT_SEC * 1000,
+    .idle_core_mask = (1 << portNUM_PROCESSORS) - 1,
+    .trigger_panic = true
+  };
+
+  esp_task_wdt_init(&wdt_config);
 
   // ================= CREATE TASKS =================
 
